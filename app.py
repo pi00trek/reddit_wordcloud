@@ -8,16 +8,14 @@ import os
 import config
 
 
-# app = Flask(__name__, static_folder='/home/piotrek/PycharmProjects/reddit_playground/static',
-#             static_url_path='/home/piotrek/PycharmProjects/reddit_playground/static')
-app = Flask(__name__)#, static_folder='static', static_url_path='/static')
+app = Flask(__name__, static_folder=config.static_folder, static_url_path=config.static_url_path)
 
-# app.config['SECRET_KEY'] = 'hard to guess string'
-app.config.from_object('config')
+app.secret_key = config.SECRET_KEY
+# app.config.from_object('config')
 
-reddit = praw.Reddit(client_id=app.config['client_id'],
-                     client_secret=app.config['client_secret'],
-                     user_agent=app.config['user_agent'])
+reddit = praw.Reddit(client_id=config.client_id,
+                     client_secret=config.client_secret,
+                     user_agent=config.user_agent)
 
 #set no of comments (deque size);;; time also might be used if changed if/break in the get_first comments
 no_comments = 100
@@ -72,8 +70,7 @@ def index():
     print("{} - to draw a figure".format(time.time() - start))
 
     return render_template('index.html', name='word cloud', cache=-1)
-                           # url='/home/piotrek/PycharmProjects/reddit_playground/static/new_plot.png')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=config.DEBUG)
