@@ -1,19 +1,19 @@
-<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <!--<meta charset="UTF-8" http-equiv="refresh" content="3">-->
-    <!--<meta charset="UTF-8" HTTP-EQUIV="refresh" CONTENT="5">-->
     <title>{{ name }}</title>
 </head>
-<body>
+
+{% block content %}
+<body style="text-align:center">
+    <div>time taken: {{ time_taken }}</div>
     <p>
-        <!--<img src="/home/piotrek/PycharmProjects/reddit_playground/static/new_plot.png" alt="new plot" height="120" width="180">-->
-        <img src="{{ url_for('static', filename = 'new_plot.png') }}" alt="new_plot" height="420" width="620">
-        <!--<img src="/static/new_plot.png" alt="new_plot" height="420" width="620">-->
+        <img src="{{ url_for('static', filename = 'new_plot.png') }}" alt="new_plot" height="480" width="640">
     </p>
-    <h1>{{ st }}</h1>
-    <br>
-    <p>{{ c_st }}</p>
 </body>
+{% endblock %}
+
 </html>

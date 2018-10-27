@@ -6,9 +6,12 @@ import praw
 import time
 import os
 import config
+from flask_bootstrap import Bootstrap
+# import pandas as pd
 
 
 app = Flask(__name__, static_folder=config.static_folder, static_url_path=config.static_url_path)
+bootstrap = Bootstrap(app)
 
 app.secret_key = config.SECRET_KEY
 # app.config.from_object('config')
@@ -38,6 +41,7 @@ def dated_url_for(endpoint, **values):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    start1 = time.time()
     start = time.time()
     output = get_first_comments(reddit, no_comments)
     print("{} - to get {} comments".format(time.time() - start, no_comments))
@@ -51,16 +55,12 @@ def index():
     output2 = output.copy()
     for key, value in output2.items():
         if key in STOPWORDS:
-            # print(key)
             del output[key]
-        #     pass
-        # else:
-        #     output2[key] = value
     del output['']
     print('{} len(output) after cleaning that took {} ;;; output:'.format(len(output.keys()), time.time() - start))
     print(output)
     start = time.time()
-    wc = WordCloud().generate_from_frequencies(output)
+    wc = WordCloud(background_color='white').generate_from_frequencies(output)
     plt.figure()
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
@@ -68,9 +68,9 @@ def index():
     plt.clf()
     print('_________________')
     print("{} - to draw a figure".format(time.time() - start))
-
-    return render_template('index.html', name='word cloud', cache=-1)
+    time_taken = time.time() - start1
+    return render_template('index.html', name='word cloud', time_taken=time_taken, cache=-1)
 
 
 if __name__ == '__main__':
-    app.run(debug=config.DEBUG)
+    app.run(debug=config.DEBUG, port=config.port)
