@@ -1,43 +1,34 @@
 import re
-from collections import deque, Counter
+from collections import Counter
 
 
-def get_first_comments(reddit, no_comments):
+class TooFewCommentsError(Exception):
+    pass
+
+
+def get_comments_word_count(comments, no_comments=100):
     """
-    Produces first Counter of words in selected comments to create deque which will be updated further
-    :param reddit: connection to reddit comment streaming
-    :param no_comments: how many comments to use a starting point for deque (analysis pool);
-                        time can be added if the last if modified/another added
-    :return: counter of words from (over) no_comments
+    Creates a Counter that is updated with words from comments
+    :param comments: list of strings (comments);
+    :param no_comments:#TODO: no_comments twice
+    :return: counter of words from
     """
+
+    if no_comments < 1:
+        raise TooFewCommentsError()
 
     output = Counter()
 
-    ## Approach with list appending (1/3)
-    # start_comments = []
-    # len_words_start = 0
-
-# for i, comment in enumerate(reddit.subreddit('all').stream.comments()):
-    for i, comment in enumerate(reddit.subreddit('all').stream.comments()):
-
-
-        # print([re.sub("[^a-zA-Z]+", "", j) for j in comment.body.split(' ')])#TODO: usunac '' - czyli nic..
-        # print(len(output))
-        # print(output)
-        output += Counter([re.sub("[^a-zA-Z]+", "", k) for k in comment.body.split(' ')])
+    for i, comment in enumerate(comments):
 
         if no_comments == i:
             break
 
-    ## Approach with list appending (2/3)
-    # print(comment.body.split(' '))
-    # [re.sub("[^a-zA-Z]+", "", i) for i in comment.body.split(' ')]
-    # len_words_start = len_words_start + len([re.sub("[^a-zA-Z]+", "", i) for i in comment.body.split(' ')])
-    # print(len_words_start)
+        split_comment = comment.split(' ')
+        comment_counts = [re.sub("[^a-zA-Z]+", "", k) for k in split_comment]
+        output.update(comment_counts)
 
-    ## List appending only here(3/3)
-    # start_comments.append([re.sub("[^a-zA-Z]+", "", i) for i in comment.body.split(' ')])
-    # print (start_comments[i])
+    del output['']
 
     return output
 

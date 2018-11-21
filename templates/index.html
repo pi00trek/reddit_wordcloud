@@ -1,11 +1,7 @@
 {% extends "bootstrap/base.html" %}
 
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <!--<meta charset="UTF-8" http-equiv="refresh" content="3">-->
-    <title>{{ name }}</title>
-</head>
+{% block title %}{{ name }}{% endblock %}
+
 
 {% block content %}
 <body style="text-align:center">
@@ -15,5 +11,3 @@
     </p>
 </body>
 {% endblock %}
-
-</html>

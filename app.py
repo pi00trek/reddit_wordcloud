@@ -1,12 +1,13 @@
 from flask import Flask, render_template, url_for
-from data import get_first_comments
+from flask_bootstrap import Bootstrap
+import logging
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 import praw
 import time
 import os
 import config
-from flask_bootstrap import Bootstrap
+from data import get_comments_word_count
 # import pandas as pd
 
 
@@ -14,14 +15,15 @@ app = Flask(__name__, static_folder=config.static_folder, static_url_path=config
 bootstrap = Bootstrap(app)
 
 app.secret_key = config.SECRET_KEY
-# app.config.from_object('config')
 
 reddit = praw.Reddit(client_id=config.client_id,
                      client_secret=config.client_secret,
                      user_agent=config.user_agent)
 
-#set no of comments (deque size);;; time also might be used if changed if/break in the get_first comments
-no_comments = 100
+logging.basicConfig(filename='example.log', level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+no_comments = 500#maximum is 1000 but fetches ~800
 
 
 @app.context_processor
@@ -41,34 +43,34 @@ def dated_url_for(endpoint, **values):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    start1 = time.time()
+    start_for_total = time.time()
     start = time.time()
-    output = get_first_comments(reddit, no_comments)
-    print("{} - to get {} comments".format(time.time() - start, no_comments))
+
+    # comments = (x.body for x in reddit.subreddit('all').stream.comments())
+    comments = [x.body for x in reddit.subreddit('all').comments(limit=no_comments)]#TODO: no_comments twice
+    output = get_comments_word_count(comments, no_comments)
+    logging.info("getting %s comments; time - %s", no_comments, time.time() - start)
+
     start = time.time()
-    print(no_comments)
-    print('output and len')
-    print(output)
-    print(len(output.keys()))
-    print('stopwords:')
-    print(STOPWORDS)
     output2 = output.copy()
     for key, value in output2.items():
         if key in STOPWORDS:
             del output[key]
-    del output['']
-    print('{} len(output) after cleaning that took {} ;;; output:'.format(len(output.keys()), time.time() - start))
-    print(output)
+    del output2
+    logging.info('%s words left after removing stopwords; time - %s', len(output.keys()), time.time() - start)
+
     start = time.time()
     wc = WordCloud(background_color='white').generate_from_frequencies(output)
     plt.figure()
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
-    plt.savefig('/home/piotrek/PycharmProjects/reddit_playground/static/new_plot.png')
+    plt.savefig(os.path.join(config.static_folder, 'new_plot.png'))
     plt.clf()
-    print('_________________')
-    print("{} - to draw a figure".format(time.time() - start))
-    time_taken = time.time() - start1
+    logging.info('drawing figure time - %s', time.time() - start)
+
+    time_taken = time.time() - start_for_total
+    logging.info('total time - %s', time_taken)
+
     return render_template('index.html', name='word cloud', time_taken=time_taken, cache=-1)
 
 
